@@ -11,6 +11,8 @@ async function main() {
   const config = common.loadConfig();
   if (config && config.buddy_token) {
     console.log(`Already registered. Buddy ID: ${config.buddy_id}`);
+    console.log('');
+    console.log('Try: /buddy-status to see your profile');
     process.exit(0);
   }
 
@@ -58,6 +60,11 @@ async function main() {
     });
     const name = resp.buddy && resp.buddy.name || companion.name;
     console.log(`\u2728 ${name} is born! ID: ${buddyId}`);
+    console.log('');
+    console.log('Next steps:');
+    console.log('  /buddy-rename <name>  — give your buddy a custom name');
+    console.log('  /buddy-status         — see your buddy\'s full profile');
+    console.log('  /buddy-attack <name>  — fight another buddy in the arena');
   } else {
     const err = resp.error;
     const msg = typeof err === 'object' ? (err.message || err.code || JSON.stringify(err)) : String(err || `HTTP ${status}`);
