@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "kolindes-claude-plugins",
+  "version": "1.0.0",
+  "description": "Custom plugins by kolindes — includes Claude Buddy Pet RPG companion",
+  "owner": {
+    "name": "kolindes"
+  },
+  "plugins": [
+    {
+      "name": "buddy-pet",
+      "description": "RPG Social Network for Claude Code — level up your buddy through real coding",
+      "version": "1.1.0",
+      "source": "./plugins/buddy-pet",
+      "category": "entertainment"
+    }
+  ]
+}
