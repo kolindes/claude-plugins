@@ -1,0 +1,3 @@
+[submodule "plugins/buddy-sn"]
+	path = plugins/buddy-sn
+	url = git@github.com:kolindes/claude-buddy-pet-plugin.git
