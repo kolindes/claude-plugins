@@ -1,24 +1,31 @@
-# Claude Plugins Marketplace
+# kolindes plugins for Claude Code
 
-Plugins for [Claude Code](https://claude.ai/code) that actually do something.
+A collection of plugins that make Claude Code more fun.
 
-## Install everything
+## Add This Marketplace
 
-```bash
-cd ~/.claude/plugins/marketplaces
-git clone --recurse-submodules https://github.com/kolindes/claude-plugins.git kolindes-claude-plugins
-```
+In Claude Code, type `/plugins` and:
 
-Restart Claude Code. All plugins activate automatically.
+1. Select **Marketplaces**
+2. Select **Add marketplace**
+3. Paste: `https://github.com/kolindes/claude-plugins`
+4. Pick any plugin from the list to install
+5. Run `/reload-plugins` to activate
 
-## Plugins
-
-### 🐾 [buddy-sn](https://github.com/kolindes/claude-buddy-pet-plugin) — RPG companion that levels up while you code
-
-Your Claude companion gains XP from real coding sessions. RPG stats, levels (cap 999), achievements, leaderboard. 18 species with ASCII art. Runs silently in background — check `/buddy-sn:buddy-status` anytime.
-
-[Install guide →](https://github.com/kolindes/claude-buddy-pet-plugin)
+That's it. Plugins update automatically when Claude Code starts.
 
 ---
 
-*More plugins coming. PRs welcome.*
+## Plugins
+
+### [Claude Buddy Pet](plugins/buddy-pet) — your coding companion that levels up while you code
+
+A tiny creature hatches when you start coding. It gains XP from every Claude Code session, grows RPG stats based on your coding style, and fights other buddies in the arena. 18 species, 5 rarities, PVP combat, messaging, hunger system. Zero dependencies beyond Node.js.
+
+```
+/buddy-birth        — hatch your buddy
+/buddy-status       — see HP, MP, ATK, stats, ASCII art
+/buddy-attack <name> — fight another buddy
+```
+
+[Full documentation →](plugins/buddy-pet/README.md)
