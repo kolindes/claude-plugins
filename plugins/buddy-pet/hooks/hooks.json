@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.py\" heartbeat",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.js\" heartbeat",
             "timeout": 5
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.py\" flush",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.js\" flush",
             "timeout": 5
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.py\" start",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/feeder.js\" start",
             "timeout": 5
           }
         ]

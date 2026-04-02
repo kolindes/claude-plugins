@@ -4,6 +4,6 @@ allowed-tools: ["Bash"]
 ---
 Run this command to register your BUDDY:
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/birth.py"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/birth.js"
 ```
 Show the output to the user. Do not modify or interpret — just execute and display.
