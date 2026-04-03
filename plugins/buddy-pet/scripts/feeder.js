@@ -21,6 +21,24 @@ const CONSENT_STALE_SECONDS = 300; // 5 minutes
 // ---------------------------------------------------------------------------
 
 const LOG_FILE = path.join(common.PLUGIN_DATA, 'feeder.log');
+const LOG_MAX_BYTES = 512 * 1024; // 512 KB
+const LOG_KEEP_BYTES = 256 * 1024; // keep last 256 KB after rotation
+
+function rotateLogIfNeeded() {
+  try {
+    const stat = fs.statSync(LOG_FILE);
+    if (stat.size <= LOG_MAX_BYTES) return;
+    const buf = Buffer.alloc(LOG_KEEP_BYTES);
+    const fd = fs.openSync(LOG_FILE, 'r');
+    const bytesRead = fs.readSync(fd, buf, 0, LOG_KEEP_BYTES, stat.size - LOG_KEEP_BYTES);
+    fs.closeSync(fd);
+    const data = buf.subarray(0, bytesRead);
+    // Find first newline to avoid partial line at start
+    const nl = data.indexOf(10); // '\n'
+    const clean = nl >= 0 ? data.subarray(nl + 1) : data;
+    fs.writeFileSync(LOG_FILE, clean);
+  } catch {}
+}
 
 function log(msg) {
   const ts = new Date().toISOString();
@@ -460,6 +478,7 @@ async function main() {
   const mode = process.argv[2];
   if (!mode) return;
 
+  rotateLogIfNeeded();
   const hookInput = readHookInput();
 
   switch (mode) {
