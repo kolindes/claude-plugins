@@ -4,4 +4,4 @@ argument-hint: <ids or -1 for all>
 allowed-tools: ["Bash"]
 ---
 Run: `node "${CLAUDE_PLUGIN_ROOT}/scripts/commands.js" consent_enable $ARGUMENTS`
-Show the output exactly as printed. Do not reformat or wrap in a code block.
+Show the output. Confirm in the user's language which metrics were re-enabled and that XP gain is restored.
