@@ -96,14 +96,20 @@ function requireConfig() {
   return config;
 }
 
+function formatSeconds(s) {
+  if (s >= 60) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  return `${s}s`;
+}
+
 function apiError(status, resp) {
   if (status === 0) return '\u{1f4e1} Could not connect to API';
   const err = resp.error;
   const msg = typeof err === 'object' ? (err.message || err.code || `HTTP ${status}`) : String(err || `HTTP ${status}`);
-  // Friendly prefixes for common errors
-  if (msg.includes('cooldown')) return `\u23f3 ${msg.replace('cooldown: ', '')}`;
-  if (msg.includes('not found')) return `\u2753 ${msg}`;
-  if (msg.includes('rate limit')) return `\u23f3 ${msg}`;
+  // Friendly messages for common errors
+  const cdMatch = msg.match(/cooldown.*?(\d+)s/);
+  if (cdMatch) return `\u23f3 On cooldown — try again in ${formatSeconds(parseInt(cdMatch[1]))}`;
+  if (msg.includes('not found')) return `\u2753 Buddy "${msg.replace('buddy not found', '').trim() || 'unknown'}" not found`;
+  if (msg.includes('rate limit')) return `\u23f3 Too many changes — wait a bit and try again`;
   if (msg.includes('cannot')) return `\u{1f6ab} ${msg}`;
   return `\u274c ${msg}`;
 }
@@ -124,7 +130,7 @@ async function cmdDescription(text) {
   if (text == null) { console.log('Usage: /description <text>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/description', { description: text }, config.buddy_token);
-  if (status === 200) { console.log('\u2705 Description updated'); }
+  if (status === 200) { console.log(`\u2705 Description updated: "${text}"`); }
   else { console.log(apiError(status, resp)); process.exit(1); }
 }
 
@@ -164,8 +170,14 @@ async function cmdAttack(targetName) {
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/arena/attack', { target_name: targetName }, config.buddy_token);
   if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
-  if (resp.success) console.log(`\u2694\ufe0f ${resp.display_hint}`);
-  else console.log(`\u274c [${resp.error_code || 'UNKNOWN'}] ${resp.display_hint || ''}`);
+  if (resp.success) {
+    const kill = resp.target_killed ? ' \u{1f480} KNOCKOUT!' : '';
+    const hpPct = resp.target_hp_max ? Math.round(resp.target_hp_after / resp.target_hp_max * 100) : '?';
+    console.log(`\u2694\ufe0f Hit ${resp.target_name} for ${formatNumber(resp.damage_dealt)} damage!${kill}`);
+    console.log(`   HP: ${formatNumber(resp.target_hp_after)}/${formatNumber(resp.target_hp_max)} (${hpPct}%) | MP spent: ${formatNumber(resp.mp_cost)}, remaining: ${formatNumber(resp.mp_remaining)}`);
+  } else {
+    console.log(`\u274c ${resp.display_hint || resp.error_code || 'Attack failed'}`);
+  }
 }
 
 async function cmdSendMessage(argsStr) {
@@ -384,9 +396,14 @@ function idsToChanges(ids, enabled) {
 }
 
 async function cmdConsentDisable(args) {
+  if (!args.length) {
+    console.log('Usage: /consent-disable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /consents to see available IDs.');
+    process.exit(1);
+  }
   const ids = parseConsentIds(args);
   if (!ids) {
-    console.log('Usage: /consent-disable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log(`\u274c Invalid ID. Use 1-${CONSENT_CATEGORIES.length} or -1 for all.`);
     console.log('Run /consents to see available IDs.');
     process.exit(1);
   }
@@ -404,9 +421,14 @@ async function cmdConsentDisable(args) {
 }
 
 async function cmdConsentEnable(args) {
+  if (!args.length) {
+    console.log('Usage: /consent-enable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /consents to see available IDs.');
+    process.exit(1);
+  }
   const ids = parseConsentIds(args);
   if (!ids) {
-    console.log('Usage: /consent-enable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log(`\u274c Invalid ID. Use 1-${CONSENT_CATEGORIES.length} or -1 for all.`);
     console.log('Run /consents to see available IDs.');
     process.exit(1);
   }
