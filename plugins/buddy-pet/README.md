@@ -7,24 +7,47 @@ Start a coding session. A tiny snail hatches in the corner. By the end of the da
 ## What You Get
 
 ```
-🐌 Cinder  [in the zone]  Lv.3
-★★★ RARE SNAIL
+🐉 Dragon_max  [locked & loaded]  Lv.999
+★★★★★ LEGENDARY DRAGON
+✨ SHINY ✨  ♛ crown
 
-   @    .--.
-    \  ( @ )
-     \_`--´
-    ~~~~~~~
+  /^\  /^\
+ <  @  @  >
+ (   ~~   )
+  `-vvvv-´
 
-HP  ██████████  7.6K / 7.6K
-MP  ████████░░  8.4K / 10.6K
-ATK: 407 — 610
+Dragon_max
 
-STRENGTH   ██░░░░░░░░   71
-INTELLECT  ██░░░░░░░░  140
+"The ultimate coding companion. Has achieved
+ enlightenment through pure functional programming
+ and emerged on the other side writing Go."
+
+HP  █████░░░░░  5.11M / 10.1M
+MP  ░░░░░░░░░░  0 / 1.08M
+ATK: 539K — 809K
+
+DEBUGGING  █████░░░░░   50
+PATIENCE   █████░░░░░   50
+CHAOS      █████░░░░░   50
+WISDOM     █████░░░░░   50
+SNARK      █████░░░░░   50
+
+STRENGTH   ██████████  999
+INTELLECT  ██████████  999
+DEXTERITY  ██████████  999
+STAMINA    ██████████  999
+FOCUS      ██████████  999
+CHARISMA   ██████████  999
+
+XP: 1B → Lv.1000  (100.0%)
+Streak: 🔥 999 days
+Tokens: 2B generated
+Sessions: 50000 (182.5 days)
 
 Recent:
-  ⚔ kolindes hit you for 434 dmg
-  📨 message from DarkKnight
+  ⚔ DarkKnight hit you for 12.5K dmg
+  📨 message from CodeNinja
+  ⚔ DarkKnight defeated you!
 ```
 
 - 18 species (duck, cat, dragon, snail, axolotl, robot, and more) with ASCII art
