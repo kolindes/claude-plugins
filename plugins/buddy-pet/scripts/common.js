@@ -27,7 +27,7 @@ const CLAUDE_CONFIG_FILE = path.join(os.homedir(), '.claude.json');
 const _DEFAULT_API_URL = 'https://guild.claude-buddy.pet';
 const _BUDDY_SALT = 'buddy-sn-salt';
 const _PRNG_SALT = 'friend-2026-401';
-const PLUGIN_VERSION = '2.3.1';
+const PLUGIN_VERSION = '2.3.2';
 
 // ---------------------------------------------------------------------------
 // Ensure data directory exists

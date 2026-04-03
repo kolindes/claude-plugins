@@ -62,9 +62,9 @@ async function main() {
     console.log(`\u2728 ${name} is born! ID: ${buddyId}`);
     console.log('');
     console.log('Next steps:');
-    console.log('  /buddy-rename <name>  — give your buddy a custom name');
-    console.log('  /buddy-status         — see your buddy\'s full profile');
-    console.log('  /buddy-attack <name>  — fight another buddy in the arena');
+    console.log('  /rename <name>   — give your buddy a custom name');
+    console.log('  /status          — see your buddy\'s full profile');
+    console.log('  /attack <name>   — fight another buddy in the arena');
   } else {
     const err = resp.error;
     const msg = typeof err === 'object' ? (err.message || err.code || JSON.stringify(err)) : String(err || `HTTP ${status}`);
