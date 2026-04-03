@@ -101,15 +101,20 @@ function formatSeconds(s) {
   return `${s}s`;
 }
 
-function apiError(status, resp) {
+function apiError(status, resp, context) {
   if (status === 0) return '\u{1f4e1} Could not connect to API';
   const err = resp.error;
   const msg = typeof err === 'object' ? (err.message || err.code || `HTTP ${status}`) : String(err || `HTTP ${status}`);
   // Friendly messages for common errors
   const cdMatch = msg.match(/cooldown.*?(\d+)s/);
   if (cdMatch) return `\u23f3 On cooldown — try again in ${formatSeconds(parseInt(cdMatch[1]))}`;
-  if (msg.includes('not found')) return `\u2753 Buddy "${msg.replace('buddy not found', '').trim() || 'unknown'}" not found`;
+  if (msg.includes('not found')) return `\u2753 Buddy not found`;
   if (msg.includes('rate limit')) return `\u23f3 Too many changes — wait a bit and try again`;
+  if (msg.includes('already taken')) return `\u274c Name "${context || '?'}" is already taken. Choose another.`;
+  if (msg.includes('reserved')) return `\u274c Name "${context || '?'}" is reserved. Choose another.`;
+  if (msg.includes('letters, digits')) return `\u274c Invalid name. Only letters, digits, underscore (_) and hyphen (-) allowed. 2-20 chars.`;
+  if (msg.includes('at least') || msg.includes('at most')) return `\u274c Name must be 2-20 characters.`;
+  if (msg.includes('inappropriate')) return `\u274c Name contains inappropriate language.`;
   if (msg.includes('cannot')) return `\u{1f6ab} ${msg}`;
   return `\u274c ${msg}`;
 }
@@ -119,11 +124,11 @@ function apiError(status, resp) {
 // ---------------------------------------------------------------------------
 
 async function cmdRename(name) {
-  if (!name) { console.log('Usage: /rename <name>'); process.exit(1); }
+  if (!name) { console.log('Usage: /rename <name>\nOnly letters, digits, underscore (_) and hyphen (-). 2-20 chars.'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/name', { display_name: name }, config.buddy_token);
   if (status === 200) { console.log(`\u2705 Renamed to: ${resp.display_name || name}`); }
-  else { console.log(apiError(status, resp)); process.exit(1); }
+  else { console.log(apiError(status, resp, name)); process.exit(1); }
 }
 
 async function cmdDescription(text) {

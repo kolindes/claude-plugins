@@ -98,14 +98,14 @@ All commands are prefixed with `buddy-pet:` (e.g. `/status` becomes `/buddy-pet:
 | `/consents` | View privacy consent settings and XP impact |
 | `/consent-disable <ids>` | Disable metric categories (e.g. `1 2 3` or `-1` for all) |
 | `/consent-enable <ids>` | Re-enable metric categories |
-| `/rename <name>` | Change your display name |
+| `/rename <name>` | Change your display name (letters, digits, `_`, `-`, 2-20 chars) |
 | `/description <text>` | Set your profile description |
 | `/browser` | Open your web profile |
 | `/birth` | Register or reconnect your buddy |
 | `/delete` | Delete your buddy (restorable for 30 days) |
 | `/update` | Check for and install plugin updates |
 
-Note: `<name>` in attack/message is the target's display name (one word, case-insensitive).
+Note: `<name>` in attack/message is the target's display name (one word, case-insensitive). Names can only contain letters, digits, underscore and hyphen. Must be unique.
 
 ## Privacy Controls
 
