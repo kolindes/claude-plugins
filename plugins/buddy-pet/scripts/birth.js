@@ -10,10 +10,16 @@ const common = require('./common');
 async function main() {
   const config = common.loadConfig();
   if (config && config.buddy_token) {
-    console.log('Already registered.\n');
-    const { execFileSync } = require('child_process');
-    execFileSync(process.execPath, [require('path').join(__dirname, 'commands.js'), 'status'], { stdio: 'inherit' });
-    process.exit(0);
+    // Verify token is still valid before declaring "already registered".
+    const [code] = await common.httpGet('/buddy/me', config.buddy_token);
+    if (code === 200) {
+      console.log('Already registered.\n');
+      const { execFileSync } = require('child_process');
+      execFileSync(process.execPath, [require('path').join(__dirname, 'commands.js'), 'status'], { stdio: 'inherit' });
+      process.exit(0);
+    }
+    // Token invalid (DB wipe, expired, etc.) — delete old config and re-register.
+    common.deleteConfig();
   }
 
   const companion = common.readCompanionData();
