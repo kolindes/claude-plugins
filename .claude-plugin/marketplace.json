@@ -10,7 +10,7 @@
     {
       "name": "buddy-pet",
       "description": "RPG Social Network for Claude Code — level up your buddy through real coding",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "source": "./plugins/buddy-pet",
       "category": "entertainment"
     }

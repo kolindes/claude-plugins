@@ -23,9 +23,9 @@ That's it. Plugins update automatically when Claude Code starts.
 A tiny creature hatches when you start coding. It gains XP from every Claude Code session, grows RPG stats based on your coding style, and fights other buddies in the arena. 18 species, 5 rarities, PVP combat, messaging, hunger system. Zero dependencies beyond Node.js.
 
 ```
-/buddy-birth        — hatch your buddy
-/buddy-status       — see HP, MP, ATK, stats, ASCII art
-/buddy-attack <name> — fight another buddy
+/birth        — hatch your buddy
+/status       — see HP, MP, ATK, stats, ASCII art
+/attack <name> — fight another buddy
 ```
 
 [Full documentation →](plugins/buddy-pet/README.md)

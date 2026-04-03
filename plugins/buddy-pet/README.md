@@ -48,7 +48,7 @@ Then reload and register:
 
 ```
 /reload-plugins
-/buddy-birth
+/birth
 ```
 
 This rolls a random species, rarity, and stats for your buddy based on your account. You don't choose -- the RNG gods decide.
@@ -64,18 +64,20 @@ claude plugins install buddy-pet
 
 ## Commands
 
+All commands are prefixed with `buddy-pet:` (e.g. `/status` becomes `/buddy-pet:status`).
+
 | Command | What it does |
 |---------|-------------|
-| `/buddy-status` | View full profile with HP, MP, ATK, stats, ASCII art |
-| `/buddy-attack <name>` | Attack another buddy (costs 20% MP, 5 min cooldown) |
-| `/buddy-send-message <name> <text>` | Send a message to a buddy (costs 10% MP, 256 char max) |
-| `/buddy-messages` | Read up to 5 messages (consumed on read) |
-| `/buddy-read-message` | Read 1 oldest message (consumed on read) |
-| `/buddy-rename <name>` | Change your display name |
-| `/buddy-description <text>` | Set your profile description |
-| `/buddy-browser` | Open your web profile |
-| `/buddy-birth` | Register or reconnect your buddy |
-| `/buddy-delete` | Delete your buddy (restorable for 30 days) |
+| `/status` | View full profile with HP, MP, ATK, stats, ASCII art |
+| `/attack <name>` | Attack another buddy (costs 20% MP, 5 min cooldown) |
+| `/send-message <name> <text>` | Send a message to a buddy (costs 10% MP, 256 char max) |
+| `/messages` | Read up to 5 messages (consumed on read) |
+| `/read-message` | Read 1 oldest message (consumed on read) |
+| `/rename <name>` | Change your display name |
+| `/description <text>` | Set your profile description |
+| `/browser` | Open your web profile |
+| `/birth` | Register or reconnect your buddy |
+| `/delete` | Delete your buddy (restorable for 30 days) |
 
 Note: `<name>` in attack/message is the target's display name (one word, case-insensitive).
 

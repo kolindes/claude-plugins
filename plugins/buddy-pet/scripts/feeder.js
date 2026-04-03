@@ -9,6 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const common = require('./common');
 
+// Catch ALL errors — hooks must never show errors to user.
+process.on('uncaughtException', () => process.exit(0));
+process.on('unhandledRejection', () => process.exit(0));
+
 const HEARTBEAT_INTERVAL = 30; // seconds
 
 // ---------------------------------------------------------------------------
@@ -340,4 +344,8 @@ async function main() {
   }
 }
 
-main().catch((err) => { log(`error: ${err.message}`); });
+main().catch((err) => {
+  try { log(`error: ${err.message}`); } catch {}
+  // Never exit with non-zero — hook errors are shown to user and it's not their fault.
+  process.exit(0);
+});
