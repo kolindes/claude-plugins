@@ -348,9 +348,9 @@ async function cmdConsents() {
   const consents = resp.consents || [];
   const lines = [];
 
-  // Header
-  lines.push(' #   Category            XP%    Status');
-  lines.push('---  ------------------  -----  ------');
+  // Header (avoid # and --- which Claude Code renders as markdown)
+  lines.push(' ID  Category            XP%    Status');
+  lines.push(' ..  ..................  .....  ......');
 
   for (const c of consents) {
     const id = String(c.id).padStart(2);
