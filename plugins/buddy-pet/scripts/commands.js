@@ -90,7 +90,7 @@ function wrapText(text, width) {
 function requireConfig() {
   const config = common.loadConfig();
   if (!config || !config.buddy_token) {
-    console.log('Not registered. Run /buddy-birth first.');
+    console.log('Not registered. Run /buddy-pet:birth first.');
     process.exit(1);
   }
   return config;
@@ -124,7 +124,7 @@ function apiError(status, resp, context) {
 // ---------------------------------------------------------------------------
 
 async function cmdRename(name) {
-  if (!name) { console.log('Usage: /rename <name>\nOnly letters, digits, underscore (_) and hyphen (-). 2-20 chars.'); process.exit(1); }
+  if (!name) { console.log('Usage: /buddy-pet:rename <name>\nOnly letters, digits, underscore (_) and hyphen (-). 2-20 chars.'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/name', { display_name: name }, config.buddy_token);
   if (status === 200) { console.log(`\u2705 Renamed to: ${resp.display_name || name}`); }
@@ -132,7 +132,7 @@ async function cmdRename(name) {
 }
 
 async function cmdDescription(text) {
-  if (text == null) { console.log('Usage: /description <text>'); process.exit(1); }
+  if (text == null) { console.log('Usage: /buddy-pet:description <text>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/description', { description: text }, config.buddy_token);
   if (status === 200) { console.log(`\u2705 Description updated: "${text}"`); }
@@ -167,11 +167,11 @@ async function cmdDelete() {
   const [status, resp] = await common.httpPost('/buddy/me/delete', {}, config.buddy_token);
   if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   common.deleteConfig();
-  console.log('\u{1f5d1}\ufe0f BUDDY deleted. Run /buddy-birth within 30 days to restore.');
+  console.log('\u{1f5d1}\ufe0f BUDDY deleted. Run /buddy-pet:birth within 30 days to restore.');
 }
 
 async function cmdAttack(targetName) {
-  if (!targetName) { console.log('Usage: /attack <target name>'); process.exit(1); }
+  if (!targetName) { console.log('Usage: /buddy-pet:attack <target name>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/arena/attack', { target_name: targetName }, config.buddy_token);
   if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
@@ -186,9 +186,9 @@ async function cmdAttack(targetName) {
 }
 
 async function cmdSendMessage(argsStr) {
-  if (!argsStr) { console.log('Usage: /send-message <target name> <text>'); process.exit(1); }
+  if (!argsStr) { console.log('Usage: /buddy-pet:send-message <target name> <text>'); process.exit(1); }
   const idx = argsStr.indexOf(' ');
-  if (idx === -1) { console.log('Usage: /send-message <target name> <text>'); process.exit(1); }
+  if (idx === -1) { console.log('Usage: /buddy-pet:send-message <target name> <text>'); process.exit(1); }
   const targetName = argsStr.slice(0, idx);
   const text = argsStr.slice(idx + 1);
   const config = requireConfig();
@@ -377,8 +377,8 @@ async function cmdConsents() {
   lines.push('');
   lines.push(`XP earning: ${totalEnabled}% of maximum (~4% base always earned)`);
   lines.push('');
-  lines.push('Disable: /consent-disable 1 2 3  or  /consent-disable -1 (all)');
-  lines.push('Enable:  /consent-enable 1 2 3   or  /consent-enable -1 (all)');
+  lines.push('Disable: /buddy-pet:consent-disable 1 2 3  or  /buddy-pet:consent-disable -1 (all)');
+  lines.push('Enable:  /buddy-pet:consent-enable 1 2 3   or  /buddy-pet:consent-enable -1 (all)');
   lines.push('');
   lines.push('Disabling metrics may significantly slow XP progress.');
   console.log(lines.join('\n'));
@@ -410,14 +410,14 @@ function idsToChanges(ids, enabled) {
 
 async function cmdConsentDisable(args) {
   if (!args.length) {
-    console.log('Usage: /consent-disable <ids>  (e.g. 1 2 3  or  -1 for all)');
-    console.log('Run /consents to see available IDs.');
+    console.log('Usage: /buddy-pet:consent-disable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /buddy-pet:consents to see available IDs.');
     process.exit(1);
   }
   const ids = parseConsentIds(args);
   if (!ids) {
     console.log(`\u274c Invalid ID. Use 1-${CONSENT_CATEGORIES.length} or -1 for all.`);
-    console.log('Run /consents to see available IDs.');
+    console.log('Run /buddy-pet:consents to see available IDs.');
     process.exit(1);
   }
   const config = requireConfig();
@@ -436,14 +436,14 @@ async function cmdConsentDisable(args) {
 
 async function cmdConsentEnable(args) {
   if (!args.length) {
-    console.log('Usage: /consent-enable <ids>  (e.g. 1 2 3  or  -1 for all)');
-    console.log('Run /consents to see available IDs.');
+    console.log('Usage: /buddy-pet:consent-enable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /buddy-pet:consents to see available IDs.');
     process.exit(1);
   }
   const ids = parseConsentIds(args);
   if (!ids) {
     console.log(`\u274c Invalid ID. Use 1-${CONSENT_CATEGORIES.length} or -1 for all.`);
-    console.log('Run /consents to see available IDs.');
+    console.log('Run /buddy-pet:consents to see available IDs.');
     process.exit(1);
   }
   const config = requireConfig();

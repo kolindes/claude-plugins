@@ -70,7 +70,7 @@ Then reload and register:
 
 ```
 /reload-plugins
-/birth
+/buddy-pet:birth
 ```
 
 This rolls a random species, rarity, and stats for your buddy based on your account. You don't choose — the RNG gods decide.
@@ -86,24 +86,22 @@ claude plugins install buddy-pet
 
 ## Commands
 
-All commands are prefixed with `buddy-pet:` (e.g. `/status` becomes `/buddy-pet:status`).
-
 | Command | What it does |
 |---------|-------------|
-| `/status` | View full profile with HP, MP, ATK, stats, ASCII art |
-| `/attack <name>` | Attack another buddy (costs 20% MP, 5 min cooldown) |
-| `/send-message <name> <text>` | Send a message to a buddy (costs 10% MP, 256 char max) |
-| `/messages` | Read up to 5 messages (consumed on read) |
-| `/read-message` | Read 1 oldest message (consumed on read) |
-| `/consents` | View privacy consent settings and XP impact |
-| `/consent-disable <ids>` | Disable metric categories (e.g. `1 2 3` or `-1` for all) |
-| `/consent-enable <ids>` | Re-enable metric categories |
-| `/rename <name>` | Change your display name (letters, digits, `_`, `-`, 2-20 chars) |
-| `/description <text>` | Set your profile description |
-| `/browser` | Open your web profile |
-| `/birth` | Register or reconnect your buddy |
-| `/delete` | Delete your buddy (restorable for 30 days) |
-| `/update` | Check for and install plugin updates |
+| `/buddy-pet:status` | View full profile with HP, MP, ATK, stats, ASCII art |
+| `/buddy-pet:attack <name>` | Attack another buddy (costs 20% MP, 5 min cooldown) |
+| `/buddy-pet:send-message <name> <text>` | Send a message to a buddy (costs 10% MP, 256 char max) |
+| `/buddy-pet:messages` | Read up to 5 messages (consumed on read) |
+| `/buddy-pet:read-message` | Read 1 oldest message (consumed on read) |
+| `/buddy-pet:consents` | View privacy consent settings and XP impact |
+| `/buddy-pet:consent-disable <ids>` | Disable metric categories (e.g. `1 2 3` or `-1` for all) |
+| `/buddy-pet:consent-enable <ids>` | Re-enable metric categories |
+| `/buddy-pet:rename <name>` | Change your display name (letters, digits, `_`, `-`, 2-20 chars) |
+| `/buddy-pet:description <text>` | Set your profile description |
+| `/buddy-pet:browser` | Open your web profile |
+| `/buddy-pet:birth` | Register or reconnect your buddy |
+| `/buddy-pet:delete` | Delete your buddy (restorable for 30 days) |
+| `/buddy-pet:update` | Check for and install plugin updates |
 
 Note: `<name>` in attack/message is the target's display name (one word, case-insensitive). Names can only contain letters, digits, underscore and hyphen. Must be unique.
 
@@ -112,7 +110,7 @@ Note: `<name>` in attack/message is the target's display name (one word, case-in
 You choose which coding metrics to share. By default everything is on. Disable any category and that data stops being collected — your XP gain slows proportionally.
 
 ```
-/consents
+/buddy-pet:consents
 
  #   Category            XP%    Status
 ---  ------------------  -----  ------
@@ -127,8 +125,8 @@ You choose which coding metrics to share. By default everything is on. Disable a
 XP earning: 100% of maximum
 ```
 
-Disable: `/consent-disable 1 3 5` or `/consent-disable -1` to disable all.
-Enable: `/consent-enable 1 3 5` or `/consent-enable -1` to re-enable all.
+Disable: `/buddy-pet:consent-disable 1 3 5` or `/buddy-pet:consent-disable -1` to disable all.
+Enable: `/buddy-pet:consent-enable 1 3 5` or `/buddy-pet:consent-enable -1` to re-enable all.
 
 Consent is enforced at three layers:
 1. **Plugin** — filters data before sending (client-side)
@@ -148,7 +146,7 @@ Even if the plugin is modified, the server enforces your consent settings.
 
 ## What Data Is Sent
 
-The plugin sends **per-turn coding metrics** to `guild.claude-buddy.pet` every 30 seconds. You can disable any category via `/consents`.
+The plugin sends **per-turn coding metrics** to `guild.claude-buddy.pet` every 30 seconds. You can disable any category via `/buddy-pet:consents`.
 
 | Category | Data sent | XP impact | Can disable? |
 |----------|-----------|-----------|-------------|
@@ -169,7 +167,7 @@ The server code is at [github.com/kolindes/code-buddy](https://github.com/kolind
 
 ## Update & Uninstall
 
-**Update**: Run `/update` to check for new versions. Or: `/plugins` → Marketplaces → Update all, then `/reload-plugins`.
+**Update**: Run `/buddy-pet:update` to check for new versions. Or: `/plugins` → Marketplaces → Update all, then `/reload-plugins`.
 
 **Uninstall**: `/plugins` → select buddy-pet → Uninstall.
 
@@ -179,7 +177,7 @@ To fully clean up local data (config, logs, cached auth token):
 rm -rf ~/.claude/plugins/data/buddy-pet
 ```
 
-Your buddy data stays on the server for 30 days after deletion. Reinstall and `/birth` to reconnect.
+Your buddy data stays on the server for 30 days after deletion. Reinstall and `/buddy-pet:birth` to reconnect.
 
 ## Requirements
 
