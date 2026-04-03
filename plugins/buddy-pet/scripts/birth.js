@@ -14,8 +14,10 @@ async function main() {
     const [code] = await common.httpGet('/buddy/me', config.buddy_token);
     if (code === 200) {
       console.log('Already registered.\n');
-      const { execFileSync } = require('child_process');
-      execFileSync(process.execPath, [require('path').join(__dirname, 'commands.js'), 'status'], { stdio: 'inherit' });
+      try {
+        const { execFileSync } = require('child_process');
+        execFileSync(process.execPath, [require('path').join(__dirname, 'commands.js'), 'status'], { stdio: 'inherit' });
+      } catch {}
       process.exit(0);
     }
     // Token invalid (DB wipe, expired, etc.) — delete old config and re-register.
