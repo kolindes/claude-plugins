@@ -87,21 +87,6 @@ function wrapText(text, width) {
   return lines;
 }
 
-function displayWidth(s) {
-  let w = 0;
-  for (const ch of s) {
-    const cp = ch.codePointAt(0);
-    if (cp === 0xfe0e || cp === 0xfe0f || cp === 0x200d) continue;
-    if (cp > 0xffff || (cp >= 0x1f000 && cp <= 0x1faff)) { w += 2; continue; }
-    if (cp >= 0x1100 && (cp <= 0x115f || (cp >= 0x2e80 && cp <= 0x9fff) ||
-        (cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0xf900 && cp <= 0xfaff) ||
-        (cp >= 0xfe30 && cp <= 0xfe6b) || (cp >= 0xff01 && cp <= 0xff60) ||
-        (cp >= 0xffe0 && cp <= 0xffe6))) { w += 2; continue; }
-    w += 1;
-  }
-  return w;
-}
-
 function requireConfig() {
   const config = common.loadConfig();
   if (!config || !config.buddy_token) {
@@ -248,22 +233,13 @@ function printStatusCard(data, recentEvents) {
 
   const emoji = SPECIES_EMOJI[species] || '\u{1f47e}';
   const stars = RARITY_STARS[rarity] || '\u2606';
-  const W = 34;
   const lines = [];
-
-  const add = (text) => { const pad = Math.max(0, W - displayWidth(text)); lines.push(`\u2502  ${text}${' '.repeat(pad)}  \u2502`); };
-  const blank = () => { lines.push(`\u2502  ${' '.repeat(W)}  \u2502`); };
-
-  lines.push(`\u256d${'\u2500'.repeat(W + 4)}\u256e`);
+  const add = (text) => lines.push(text);
+  const blank = () => lines.push('');
 
   // Header
-  const nt = name.slice(0, 16);
-  const ps = statusText ? `  [${statusText}]` : '';
-  let hdr = `${emoji} ${nt}${ps}`;
-  const lv = `Lv.${level}`;
-  let g = W - displayWidth(hdr) - lv.length;
-  if (g < 1) { hdr = `${emoji} ${nt}`; g = W - displayWidth(hdr) - lv.length; }
-  add(`${hdr}${' '.repeat(Math.max(1, g))}${lv}`);
+  const phrase = statusText ? `  [${statusText}]` : '';
+  add(`${emoji} ${name}${phrase}  Lv.${level}`);
   add(`${stars} ${rarity.toUpperCase()} ${species.toUpperCase()}`);
 
   const mods = [];
@@ -271,14 +247,16 @@ function printStatusCard(data, recentEvents) {
   if (hat && hat !== 'none') { const hi = HAT_EMOJI[hat] || ''; mods.push(hi ? `${hi} ${hat}` : hat); }
   if (mods.length) add(mods.join('  '));
 
+  blank();
   const art = SPECIES_ART[species] || SPECIES_ART.blob;
   if (art) for (const l of art) add(l.replace(/\{e\}/g, eye));
 
-  blank(); add(name);
+  blank();
+  add(name);
 
   if (personality) {
     blank();
-    const wrapped = wrapText(personality, W - 2).slice(0, 5);
+    const wrapped = wrapText(personality, 50).slice(0, 5);
     for (let i = 0; i < wrapped.length; i++) {
       const pfx = i === 0 ? '\u201c' : ' ';
       const isLast = i === Math.min(4, wrapped.length - 1);
@@ -291,14 +269,16 @@ function printStatusCard(data, recentEvents) {
     blank();
     add(`HP  ${statBar(currentHp, maxHp, 10)}  ${formatNumber(currentHp)} / ${formatNumber(maxHp)}`);
     add(`MP  ${statBar(currentMp, Math.max(maxMp, 1), 10)}  ${formatNumber(currentMp)} / ${formatNumber(maxMp)}`);
+    add(`ATK: ${formatNumber(minAtk)} \u2014 ${formatNumber(maxAtk)}`);
   }
 
   if (Object.keys(baseStats).length) {
     blank();
-    for (const k of SOUL_STAT_ORDER) add(`${k.padEnd(10)} ${statBar(baseStats[k] || 0, 100, 10)}  ${String(baseStats[k] || 0).padStart(3)}`);
+    for (const k of SOUL_STAT_ORDER) {
+      const v = baseStats[k] || 0;
+      add(`${k.padEnd(10)} ${statBar(v, 100, 10)}  ${String(v).padStart(3)}`);
+    }
   }
-
-  if (minAtk > 0) add(`ATK: ${formatNumber(minAtk)} \u2014 ${formatNumber(maxAtk)}`);
 
   if (Object.keys(rpgStats).length) {
     blank();
@@ -316,13 +296,12 @@ function printStatusCard(data, recentEvents) {
 
   const hasRecent = (recentEvents && recentEvents.length) || unreadMessages > 0;
   if (hasRecent) {
-    blank(); add('Recent:');
+    blank();
+    add('Recent:');
     if (recentEvents) for (const ev of recentEvents.slice(0, 5)) add(`  ${ev}`);
     if (unreadMessages > 0) add(`  \u{1f4e8} ${unreadMessages} unread message${unreadMessages !== 1 ? 's' : ''}`);
   }
 
-  blank();
-  lines.push(`\u2570${'\u2500'.repeat(W + 4)}\u256f`);
   console.log(lines.join('\n'));
 }
 
