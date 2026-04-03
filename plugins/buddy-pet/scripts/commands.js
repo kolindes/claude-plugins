@@ -337,6 +337,14 @@ const CONSENT_CATEGORIES = [
 ];
 
 // ---------------------------------------------------------------------------
+const PRIVACY_FOOTER = [
+  '',
+  'Privacy: Your code and prompts are never collected — only numeric counts',
+  '(tokens, tools used). Your identity is anonymized and cannot be traced back',
+  'to you. Raw metrics auto-delete after 7 days; only buddy stats persist.',
+  'Built for fun by an RPG nerd. Thanks for playing!',
+].join('\n');
+
 // Consent commands
 // ---------------------------------------------------------------------------
 
@@ -368,8 +376,8 @@ async function cmdConsents() {
   lines.push('Enable:  /consent-enable 1 2 3   or  /consent-enable -1 (all)');
   lines.push('');
   lines.push('Disabling metrics may significantly slow XP progress.');
-
   console.log(lines.join('\n'));
+  console.log(PRIVACY_FOOTER);
 }
 
 function parseConsentIds(args) {
@@ -418,6 +426,7 @@ async function cmdConsentDisable(args) {
   const names = ids.map(id => CONSENT_CATEGORIES.find(c => c.id === id).key);
   console.log(`Disabled: ${names.join(', ')}`);
   console.log(`XP earning: ${resp.total_xp_weight_enabled || 0}% of maximum`);
+  console.log(PRIVACY_FOOTER);
 }
 
 async function cmdConsentEnable(args) {
@@ -443,6 +452,7 @@ async function cmdConsentEnable(args) {
   const names = ids.map(id => CONSENT_CATEGORIES.find(c => c.id === id).key);
   console.log(`Enabled: ${names.join(', ')}`);
   console.log(`XP earning: ${resp.total_xp_weight_enabled || 0}% of maximum`);
+  console.log(PRIVACY_FOOTER);
 }
 
 function updateLocalConsents(config, resp) {
