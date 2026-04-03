@@ -10,9 +10,9 @@ const common = require('./common');
 async function main() {
   const config = common.loadConfig();
   if (config && config.buddy_token) {
-    console.log(`Already registered. Buddy ID: ${config.buddy_id}`);
-    console.log('');
-    console.log('Try: /buddy-status to see your profile');
+    console.log('Already registered.\n');
+    const { execFileSync } = require('child_process');
+    execFileSync(process.execPath, [require('path').join(__dirname, 'commands.js'), 'status'], { stdio: 'inherit' });
     process.exit(0);
   }
 
