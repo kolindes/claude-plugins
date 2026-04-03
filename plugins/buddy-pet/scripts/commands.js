@@ -97,10 +97,15 @@ function requireConfig() {
 }
 
 function apiError(status, resp) {
-  if (status === 0) return resp.error || 'Could not connect to API';
+  if (status === 0) return '\u{1f4e1} Could not connect to API';
   const err = resp.error;
-  if (typeof err === 'object') return err.message || err.code || `HTTP ${status}`;
-  return String(err || `HTTP ${status}`);
+  const msg = typeof err === 'object' ? (err.message || err.code || `HTTP ${status}`) : String(err || `HTTP ${status}`);
+  // Friendly prefixes for common errors
+  if (msg.includes('cooldown')) return `\u23f3 ${msg.replace('cooldown: ', '')}`;
+  if (msg.includes('not found')) return `\u2753 ${msg}`;
+  if (msg.includes('rate limit')) return `\u23f3 ${msg}`;
+  if (msg.includes('cannot')) return `\u{1f6ab} ${msg}`;
+  return `\u274c ${msg}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,25 +113,25 @@ function apiError(status, resp) {
 // ---------------------------------------------------------------------------
 
 async function cmdRename(name) {
-  if (!name) { console.log('Usage: commands.js rename <name>'); process.exit(1); }
+  if (!name) { console.log('Usage: /rename <name>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/name', { display_name: name }, config.buddy_token);
   if (status === 200) { console.log(`\u2705 Renamed to: ${resp.display_name || name}`); }
-  else { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  else { console.log(apiError(status, resp)); process.exit(1); }
 }
 
 async function cmdDescription(text) {
-  if (text == null) { console.log('Usage: commands.js description <text>'); process.exit(1); }
+  if (text == null) { console.log('Usage: /description <text>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPatch('/buddy/me/description', { description: text }, config.buddy_token);
   if (status === 200) { console.log('\u2705 Description updated'); }
-  else { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  else { console.log(apiError(status, resp)); process.exit(1); }
 }
 
 async function cmdStatus() {
   const config = requireConfig();
   const [status, resp] = await common.httpGet('/buddy/me', config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const [evStatus, evResp] = await common.httpGet('/arena/events', config.buddy_token);
   const recentEvents = evStatus === 200 ? (evResp.events || []) : [];
   printStatusCard(resp, recentEvents);
@@ -135,9 +140,9 @@ async function cmdStatus() {
 async function cmdBrowser() {
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/buddy/browser', {}, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const url = resp.url;
-  if (!url) { console.log('Error: No URL returned'); process.exit(1); }
+  if (!url) { console.log('\u274c No URL returned from server'); process.exit(1); }
   console.log(`\u{1f310} Opening: ${url}`);
   const { execFile } = require('child_process');
   const plat = process.platform;
@@ -149,29 +154,29 @@ async function cmdBrowser() {
 async function cmdDelete() {
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/buddy/me/delete', {}, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   common.deleteConfig();
   console.log('\u{1f5d1}\ufe0f BUDDY deleted. Run /buddy-birth within 30 days to restore.');
 }
 
 async function cmdAttack(targetName) {
-  if (!targetName) { console.log('Usage: commands.js attack <target name>'); process.exit(1); }
+  if (!targetName) { console.log('Usage: /attack <target name>'); process.exit(1); }
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/arena/attack', { target_name: targetName }, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   if (resp.success) console.log(`\u2694\ufe0f ${resp.display_hint}`);
   else console.log(`\u274c [${resp.error_code || 'UNKNOWN'}] ${resp.display_hint || ''}`);
 }
 
 async function cmdSendMessage(argsStr) {
-  if (!argsStr) { console.log('Usage: commands.js send_message <target name> <text>'); process.exit(1); }
+  if (!argsStr) { console.log('Usage: /send-message <target name> <text>'); process.exit(1); }
   const idx = argsStr.indexOf(' ');
-  if (idx === -1) { console.log('Usage: commands.js send_message <target name> <text>'); process.exit(1); }
+  if (idx === -1) { console.log('Usage: /send-message <target name> <text>'); process.exit(1); }
   const targetName = argsStr.slice(0, idx);
   const text = argsStr.slice(idx + 1);
   const config = requireConfig();
   const [status, resp] = await common.httpPost('/arena/message', { target_name: targetName, text }, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   if (resp.success) console.log(`\u{1f4e8} ${resp.display_hint}`);
   else console.log(`\u274c [${resp.error_code || 'UNKNOWN'}] ${resp.display_hint || ''}`);
 }
@@ -179,7 +184,7 @@ async function cmdSendMessage(argsStr) {
 async function cmdMessages() {
   const config = requireConfig();
   const [status, resp] = await common.httpGet('/arena/messages?count=5', config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const messages = resp.messages || [];
   if (!messages.length) { console.log('\u{1f4ed} No messages.'); return; }
   for (const m of messages) console.log(`  \u{1f4e8} ${m.sender_name || '???'}: ${m.text || ''}`);
@@ -190,7 +195,7 @@ async function cmdMessages() {
 async function cmdReadMessage() {
   const config = requireConfig();
   const [status, resp] = await common.httpGet('/arena/messages?count=1', config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const messages = resp.messages || [];
   if (!messages.length) { console.log('\u{1f4ed} No messages.'); return; }
   const m = messages[0];
@@ -326,7 +331,7 @@ const CONSENT_CATEGORIES = [
 async function cmdConsents() {
   const config = requireConfig();
   const [status, resp] = await common.httpGet('/buddy/me/consents', config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
 
   const consents = resp.consents || [];
   const lines = [];
@@ -388,7 +393,7 @@ async function cmdConsentDisable(args) {
   const config = requireConfig();
   const changes = idsToChanges(ids, false);
   const [status, resp] = await common.httpPatch('/buddy/me/consents', changes, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
 
   // Update local consent cache
   updateLocalConsents(config, resp);
@@ -408,7 +413,7 @@ async function cmdConsentEnable(args) {
   const config = requireConfig();
   const changes = idsToChanges(ids, true);
   const [status, resp] = await common.httpPatch('/buddy/me/consents', changes, config.buddy_token);
-  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+  if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
 
   // Update local consent cache
   updateLocalConsents(config, resp);
@@ -450,7 +455,7 @@ const COMMANDS = {
 async function main() {
   const cmd = process.argv[2];
   if (!cmd || !COMMANDS[cmd]) {
-    console.log(`Usage: commands.js <command> [args...]`);
+    console.log('Unknown command. Available buddy-pet commands:');
     console.log(`Commands: ${Object.keys(COMMANDS).join(', ')}`);
     process.exit(1);
   }
