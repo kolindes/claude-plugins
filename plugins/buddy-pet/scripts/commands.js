@@ -306,6 +306,129 @@ function printStatusCard(data, recentEvents) {
 }
 
 // ---------------------------------------------------------------------------
+// Consent constants
+// ---------------------------------------------------------------------------
+
+const CONSENT_CATEGORIES = [
+  { id: 1, key: 'token_usage',      description: 'Output/input/cache token counts' },
+  { id: 2, key: 'tool_usage',       description: 'Tool names, count, usage flags' },
+  { id: 3, key: 'model_identity',   description: 'Model name (e.g. claude-opus-4-6)' },
+  { id: 4, key: 'thinking_mode',    description: 'Extended thinking usage' },
+  { id: 5, key: 'web_search',       description: 'Web search request count' },
+  { id: 6, key: 'session_timing',   description: 'Session time, streak, active days' },
+  { id: 7, key: 'project_identity', description: 'Hashed project directory' },
+];
+
+// ---------------------------------------------------------------------------
+// Consent commands
+// ---------------------------------------------------------------------------
+
+async function cmdConsents() {
+  const config = requireConfig();
+  const [status, resp] = await common.httpGet('/buddy/me/consents', config.buddy_token);
+  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+
+  const consents = resp.consents || [];
+  const lines = [];
+
+  // Header
+  lines.push(' #   Category            XP%    Status');
+  lines.push('---  ------------------  -----  ------');
+
+  for (const c of consents) {
+    const id = String(c.id).padStart(2);
+    const name = (c.key || '').padEnd(18);
+    const xp = c.xp_weight > 0 ? ('~' + c.xp_weight + '%').padStart(5) : '  ~0%';
+    const on = c.enabled ? '  ON' : ' OFF';
+    lines.push(`${id}   ${name}  ${xp}  ${on}`);
+  }
+
+  const totalEnabled = resp.total_xp_weight_enabled || 0;
+  lines.push('');
+  lines.push(`XP earning: ${totalEnabled}% of maximum (~4% base always earned)`);
+  lines.push('');
+  lines.push('Disable: /consent-disable 1 2 3  or  /consent-disable -1 (all)');
+  lines.push('Enable:  /consent-enable 1 2 3   or  /consent-enable -1 (all)');
+  lines.push('');
+  lines.push('Disabling metrics may significantly slow XP progress.');
+
+  console.log(lines.join('\n'));
+}
+
+function parseConsentIds(args) {
+  if (!args.length) return null;
+  if (args.length === 1 && args[0] === '-1') {
+    return CONSENT_CATEGORIES.map(c => c.id);
+  }
+  const ids = [];
+  for (const a of args) {
+    const n = parseInt(a, 10);
+    if (isNaN(n) || n < 1 || n > CONSENT_CATEGORIES.length) return null;
+    ids.push(n);
+  }
+  return ids.length ? ids : null;
+}
+
+function idsToChanges(ids, enabled) {
+  const changes = {};
+  for (const id of ids) {
+    const cat = CONSENT_CATEGORIES.find(c => c.id === id);
+    if (cat) changes[cat.key] = enabled;
+  }
+  return changes;
+}
+
+async function cmdConsentDisable(args) {
+  const ids = parseConsentIds(args);
+  if (!ids) {
+    console.log('Usage: /consent-disable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /consents to see available IDs.');
+    process.exit(1);
+  }
+  const config = requireConfig();
+  const changes = idsToChanges(ids, false);
+  const [status, resp] = await common.httpPatch('/buddy/me/consents', changes, config.buddy_token);
+  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+
+  // Update local consent cache
+  updateLocalConsents(config, resp);
+
+  const names = ids.map(id => CONSENT_CATEGORIES.find(c => c.id === id).key);
+  console.log(`Disabled: ${names.join(', ')}`);
+  console.log(`XP earning: ${resp.total_xp_weight_enabled || 0}% of maximum`);
+}
+
+async function cmdConsentEnable(args) {
+  const ids = parseConsentIds(args);
+  if (!ids) {
+    console.log('Usage: /consent-enable <ids>  (e.g. 1 2 3  or  -1 for all)');
+    console.log('Run /consents to see available IDs.');
+    process.exit(1);
+  }
+  const config = requireConfig();
+  const changes = idsToChanges(ids, true);
+  const [status, resp] = await common.httpPatch('/buddy/me/consents', changes, config.buddy_token);
+  if (status !== 200) { console.log(`Error: ${apiError(status, resp)}`); process.exit(1); }
+
+  // Update local consent cache
+  updateLocalConsents(config, resp);
+
+  const names = ids.map(id => CONSENT_CATEGORIES.find(c => c.id === id).key);
+  console.log(`Enabled: ${names.join(', ')}`);
+  console.log(`XP earning: ${resp.total_xp_weight_enabled || 0}% of maximum`);
+}
+
+function updateLocalConsents(config, resp) {
+  const consents = {};
+  for (const c of (resp.consents || [])) {
+    consents[c.key] = c.enabled;
+  }
+  config.consents = consents;
+  config.consents_fetched_at = Math.floor(Date.now() / 1000);
+  common.saveConfig(config);
+}
+
+// ---------------------------------------------------------------------------
 // CLI dispatch
 // ---------------------------------------------------------------------------
 
@@ -319,6 +442,9 @@ const COMMANDS = {
   send_message: (args) => cmdSendMessage(args.join(' ') || null),
   messages: () => cmdMessages(),
   read_message: () => cmdReadMessage(),
+  consents: () => cmdConsents(),
+  consent_disable: (args) => cmdConsentDisable(args),
+  consent_enable: (args) => cmdConsentEnable(args),
 };
 
 async function main() {

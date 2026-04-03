@@ -14,6 +14,7 @@ process.on('uncaughtException', () => process.exit(0));
 process.on('unhandledRejection', () => process.exit(0));
 
 const HEARTBEAT_INTERVAL = 30; // seconds
+const CONSENT_STALE_SECONDS = 300; // 5 minutes
 
 // ---------------------------------------------------------------------------
 // Logging
@@ -205,6 +206,119 @@ function savePending(payload) {
 }
 
 // ---------------------------------------------------------------------------
+// Consent: fetch, cache, filter
+// ---------------------------------------------------------------------------
+
+/**
+ * Load consents from local config cache.
+ * Returns object like { token_usage: true, tool_usage: false, ... } or null.
+ */
+function loadCachedConsents(config) {
+  if (!config.consents || !config.consents_fetched_at) return null;
+  return config.consents;
+}
+
+/**
+ * Check if local consent cache is stale (older than 5 minutes).
+ */
+function isConsentStale(config) {
+  if (!config.consents_fetched_at) return true;
+  const age = Math.floor(Date.now() / 1000) - config.consents_fetched_at;
+  return age > CONSENT_STALE_SECONDS;
+}
+
+/**
+ * Fetch consents from API, update local cache.
+ * Fail-open: returns cached or all-enabled on error.
+ */
+async function refreshConsents(config) {
+  try {
+    const [status, resp] = await common.httpGet('/buddy/me/consents', config.buddy_token);
+    if (status === 200 && resp.consents) {
+      const consents = {};
+      for (const c of resp.consents) {
+        consents[c.key] = c.enabled;
+      }
+      config.consents = consents;
+      config.consents_fetched_at = Math.floor(Date.now() / 1000);
+      common.saveConfig(config);
+      log('consents refreshed');
+      return consents;
+    }
+    log(`consent fetch non-200: ${status}`);
+  } catch (err) {
+    log(`consent fetch error: ${err.message}`);
+  }
+  // Fail-open: use cached or assume all-enabled
+  return loadCachedConsents(config) || allEnabled();
+}
+
+function allEnabled() {
+  return {
+    token_usage: true,
+    tool_usage: true,
+    model_identity: true,
+    thinking_mode: true,
+    web_search: true,
+    session_timing: true,
+    project_identity: true,
+  };
+}
+
+/**
+ * Get consents for filtering: use cache if fresh, otherwise refresh.
+ */
+async function getConsents(config) {
+  if (!isConsentStale(config)) {
+    return loadCachedConsents(config) || allEnabled();
+  }
+  return refreshConsents(config);
+}
+
+/**
+ * Apply consent filter to a single event (mutates in place).
+ */
+function applyConsentFilter(event, consents) {
+  if (!consents) return;
+
+  // token_usage disabled: zero token fields
+  if (consents.token_usage === false) {
+    event.u_ot = 0;
+    event.u_it = 0;
+    event.u_crt = 0;
+    event.u_cwt = 0;
+    if ('compact_pre_tokens' in event) event.compact_pre_tokens = 0;
+  }
+
+  // tool_usage disabled: remove tool_use from c_types, zero tool arrays
+  if (consents.tool_usage === false) {
+    if (Array.isArray(event.c_types)) {
+      event.c_types = event.c_types.filter(t => t !== 'tool_use');
+    }
+    event.c_tu_n = [];
+    event.c_tu_ids = [];
+  }
+
+  // model_identity disabled: blank model
+  if (consents.model_identity === false) {
+    event.model = '';
+  }
+
+  // thinking_mode disabled: remove thinking from c_types, clear thinking sig
+  if (consents.thinking_mode === false) {
+    if (Array.isArray(event.c_types)) {
+      event.c_types = event.c_types.filter(t => t !== 'thinking');
+    }
+    event.c_ts = false;
+  }
+
+  // web_search disabled: zero web search count
+  if (consents.web_search === false) {
+    event.u_ws = 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Core send
 // ---------------------------------------------------------------------------
 
@@ -234,9 +348,18 @@ async function sendEvents(config, hookInput, state) {
       return;
     }
 
+    // Client-side consent filtering (fail-open)
+    const consents = await getConsents(config);
+    for (const ev of events) {
+      applyConsentFilter(ev, consents);
+    }
+
+    const projectHash = consents.project_identity === false
+      ? '' : common.computeProjectHash(cwd);
+
     const payload = {
       session_hash: sessionKey,
-      project_hash: common.computeProjectHash(cwd),
+      project_hash: projectHash,
       batch_seq: Math.floor(Date.now() / 1000),
       plugin_version: common.PLUGIN_VERSION,
       events,
@@ -305,6 +428,8 @@ function updateSessionState(state, sessionKey, newOffset, newCompHash) {
 async function doStart(hookInput) {
   const config = await ensureConfig();
   if (!config) return;
+  // Refresh consents on session start
+  await refreshConsents(config);
   await submitPending(config.buddy_token);
 }
 
