@@ -2,8 +2,5 @@
 description: Update buddy-pet plugin to the latest version
 allowed-tools: ["Bash"]
 ---
-Run these commands sequentially:
-```bash
-claude plugins marketplace update kolindes-claude-plugins && claude plugins uninstall buddy-pet && claude plugins install buddy-pet
-```
-Then tell the user: "Plugin updated. Run `/reload-plugins` to apply."
+Run: `node "${CLAUDE_PLUGIN_ROOT}/scripts/update.js"`
+Show the output exactly as printed. Do not reformat or wrap in a code block.
