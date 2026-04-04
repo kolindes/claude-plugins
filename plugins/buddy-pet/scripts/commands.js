@@ -154,7 +154,8 @@ async function cmdBrowser() {
   if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const url = resp.url;
   if (!url) { console.log('\u274c No URL returned from server'); process.exit(1); }
-  console.log(url);
+  console.log('Link updated.');
+  console.log('Profile link: ' + url);
 }
 
 async function cmdDelete() {
