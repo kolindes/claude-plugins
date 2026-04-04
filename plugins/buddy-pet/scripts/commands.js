@@ -154,12 +154,7 @@ async function cmdBrowser() {
   if (status !== 200) { console.log(apiError(status, resp)); process.exit(1); }
   const url = resp.url;
   if (!url) { console.log('\u274c No URL returned from server'); process.exit(1); }
-  console.log(`\u{1f310} Opening: ${url}`);
-  const { execFile } = require('child_process');
-  const plat = process.platform;
-  const cmd = plat === 'darwin' ? 'open' : plat === 'win32' ? 'cmd' : 'xdg-open';
-  const args = plat === 'win32' ? ['/c', 'start', '', url] : [url];
-  execFile(cmd, args, () => {});
+  console.log(url);
 }
 
 async function cmdDelete() {
